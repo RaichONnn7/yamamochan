@@ -669,15 +669,17 @@
         }
       });
     });
-    // お問い合わせ
-    document.querySelectorAll('.nav-item[data-page="contact"]').forEach(btn => {
-      btn.addEventListener('click', () => openContact());
-    });
+    // 子カテゴリ
+    document.querySelectorAll('.nav-child').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-child').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         applyFilter({ tag: btn.dataset.parent, subtag: btn.dataset.filterChild });
       });
+    });
+    // お問い合わせ
+    document.querySelectorAll('.nav-item[data-page="contact"]').forEach(btn => {
+      btn.addEventListener('click', () => openContact());
     });
   }
 
