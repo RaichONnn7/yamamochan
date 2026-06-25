@@ -210,6 +210,56 @@
     .result-date { font-size: 0.68rem; color: var(--c-mid); margin-left: auto; flex-shrink: 0; }
     .search-no-result { padding: 32px 40px; text-align: center; color: var(--c-mid); font-size: 0.85rem; }
 
+    /* ===== お問い合わせパネル ===== */
+    #contactPanel {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+    }
+    #contactPanel.open { display: flex; }
+    .contact-box {
+      background: #FFF; border-radius: 20px;
+      width: min(480px, 90vw); padding: 48px 40px 40px;
+      position: relative; box-shadow: 0 32px 80px rgba(0,0,0,0.25);
+      animation: contactIn 0.35s var(--ease-out);
+    }
+    @keyframes contactIn { from { opacity:0; transform:translateY(24px) scale(0.97); } }
+    .contact-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none; font-size: 1.2rem; color: var(--c-mid);
+      cursor: pointer; line-height: 1; padding: 4px 8px; border-radius: 6px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .contact-close:hover { background: var(--c-surface); color: var(--c-dark); }
+    .contact-title {
+      font-family: var(--f-display); font-size: 2rem; letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .contact-title span { color: var(--c-accent); }
+    .contact-sub { font-size: 0.8rem; color: var(--c-mid); margin-bottom: 36px; line-height: 1.6; }
+    .contact-links { display: flex; flex-direction: column; gap: 14px; }
+    .contact-link {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 20px; border-radius: 12px;
+      border: 1.5px solid var(--c-border); text-decoration: none;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s var(--ease-out);
+      color: var(--c-dark);
+    }
+    .contact-link:hover {
+      border-color: var(--c-accent); background: rgba(255,107,53,0.04);
+      transform: translateX(4px);
+    }
+    .contact-link-icon {
+      width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .icon-email   { background: linear-gradient(135deg, #FF6B35, #E8551E); }
+    .icon-x       { background: #000; }
+    .icon-github  { background: #24292e; }
+    .icon-instagram { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .contact-link-label { font-size: 0.72rem; color: var(--c-mid); margin-bottom: 2px; letter-spacing: 0.05em; }
+    .contact-link-value { font-size: 0.92rem; font-weight: 600; }
+
     /* ===== SECTIONS ===== */
     .section-pad { padding: 56px 40px; }
     .section-label { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
@@ -354,24 +404,6 @@
     </div>
   </section>
 
-  <!-- TICKER -->
-  <div class="ticker-wrap">
-    <div class="ticker-track">
-      <span class="ticker-item"><span class="ticker-dot"></span>最新テックガジェットレビュー</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>名古屋グルメ探訪</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>日々のつぶやき</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>おすすめ商品紹介</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>ゲームレビュー</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>やまもっちゃんの自己紹介</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>最新テックガジェットレビュー</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>名古屋グルメ探訪</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>日々のつぶやき</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>おすすめ商品紹介</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>ゲームレビュー</span>
-      <span class="ticker-item"><span class="ticker-dot"></span>やまもっちゃんの自己紹介</span>
-    </div>
-  </div>
-
   <!-- PAGE SHELL -->
   <div class="page-shell">
 
@@ -483,6 +515,18 @@
     </main>
   </div>
 
+  <!-- お問い合わせパネル -->
+  <div id="contactPanel">
+    <div class="contact-box">
+      <button class="contact-close" id="contactClose">✕</button>
+      <div class="contact-title">CONTACT<span>.</span></div>
+      <p class="contact-sub">気軽にどうぞ！返信は少し遅いかもですが必ず読んでいます。</p>
+      <div class="contact-links" id="contactLinks">
+        <!-- JSが生成 -->
+      </div>
+    </div>
+  </div>
+
   <script>
   /* ================================================================
    * ★★ サイト設定 ★★
@@ -493,8 +537,17 @@
    *   例3: 画像なし（イニシャル表示） → "" （空のまま）
    * ================================================================ */
   const SITE_CONFIG = {
-    AVATAR_IMAGE: "",   // ← ここに画像パスを書く（例: "images/me.jpg"）
-    AVATAR_INITIAL: "Y" // ← 画像なしの時に表示する文字
+    AVATAR_IMAGE:   "",        // ← 画像パス（例: "images/me.jpg"）
+    AVATAR_INITIAL: "Y",       // ← 画像なしの時に表示する文字
+
+    // ★ お問い合わせページの設定
+    // 使わない項目は "" にしてください
+    CONTACT: {
+      EMAIL:    "your@example.com",  // ← メールアドレス
+      X:        "your_x_handle",     // ← Xのユーザー名（@なし）
+      GITHUB:   "",                  // ← GitHubユーザー名（不要なら ""）
+      INSTAGRAM:"",                  // ← Instagramユーザー名（不要なら ""）
+    }
   };
   /* ================================================================
    * ★★ カテゴリ設定 ★★
@@ -616,8 +669,10 @@
         }
       });
     });
-    // 子カテゴリ
-    document.querySelectorAll('.nav-child').forEach(btn => {
+    // お問い合わせ
+    document.querySelectorAll('.nav-item[data-page="contact"]').forEach(btn => {
+      btn.addEventListener('click', () => openContact());
+    });
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-child').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -843,11 +898,73 @@
   }
 
   /* ================================================================
-   * 初期化
+   * お問い合わせパネル
    * ================================================================ */
+  function buildContactPanel() {
+    const c = SITE_CONFIG.CONTACT;
+    const links = [];
+
+    if (c.EMAIL) links.push({
+      href:  `mailto:${c.EMAIL}`,
+      icon:  '✉️',
+      cls:   'icon-email',
+      label: 'メール',
+      value: c.EMAIL
+    });
+    if (c.X) links.push({
+      href:  `https://x.com/${c.X}`,
+      icon:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`,
+      cls:   'icon-x',
+      label: 'X (Twitter)',
+      value: `@${c.X}`
+    });
+    if (c.GITHUB) links.push({
+      href:  `https://github.com/${c.GITHUB}`,
+      icon:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>`,
+      cls:   'icon-github',
+      label: 'GitHub',
+      value: c.GITHUB
+    });
+    if (c.INSTAGRAM) links.push({
+      href:  `https://instagram.com/${c.INSTAGRAM}`,
+      icon:  '📸',
+      cls:   'icon-instagram',
+      label: 'Instagram',
+      value: `@${c.INSTAGRAM}`
+    });
+
+    const container = document.getElementById('contactLinks');
+    container.innerHTML = links.map(l => `
+      <a class="contact-link" href="${l.href}" target="_blank" rel="noopener">
+        <div class="contact-link-icon ${l.cls}">${l.icon}</div>
+        <div>
+          <div class="contact-link-label">${l.label}</div>
+          <div class="contact-link-value">${l.value}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function openContact() {
+    document.getElementById('contactPanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeContact() {
+    document.getElementById('contactPanel').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('contactClose').addEventListener('click', closeContact);
+  document.getElementById('contactPanel').addEventListener('click', e => {
+    if (e.target === document.getElementById('contactPanel')) closeContact();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeContact();
+  });
   buildSidebar();
   renderArticles();
   initAvatar();
+  buildContactPanel();
   observeReveal();
   bind3DTilt();
 
