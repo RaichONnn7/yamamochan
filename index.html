@@ -70,13 +70,67 @@
       margin-top: 24px; font-size: 1rem; font-weight: 300; color: #AAA; letter-spacing: 0.05em;
       opacity: 0; transform: translateY(20px); animation: fadeUp 0.9s var(--ease-out) 0.65s forwards;
     }
+    /* ヒーロー下部 スクロール誘導 */
     .hero-scroll {
-      margin-top: 52px; display: inline-flex; flex-direction: column; align-items: center; gap: 8px;
-      opacity: 0; animation: fadeUp 0.9s var(--ease-out) 0.9s forwards;
+      position: absolute;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      animation: fadeUp 1s var(--ease-out) 1.2s forwards;
+      cursor: pointer;
+      z-index: 3;
     }
-    .hero-scroll span { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--c-mid); }
-    .scroll-line { width: 1px; height: 48px; background: linear-gradient(to bottom, var(--c-accent), transparent); animation: scrollPulse 2s ease-in-out infinite; }
-    @keyframes scrollPulse { 0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:0.4;transform:scaleY(0.7)} }
+    .hero-scroll-label {
+      font-family: var(--f-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+      white-space: nowrap;
+    }
+    /* 二重矢印コンテナ */
+    .hero-scroll-arrows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    /* 矢印1本分 */
+    .scroll-arrow {
+      width: 18px;
+      height: 10px;
+      position: relative;
+      opacity: 0;
+    }
+    .scroll-arrow::before,
+    .scroll-arrow::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--c-accent);
+      border-bottom: 2px solid var(--c-accent);
+      transform: rotate(45deg);
+    }
+    .scroll-arrow::before { left: 0; }
+    .scroll-arrow::after  { left: 8px; }
+    /* 波打つように順番に光る */
+    .scroll-arrow:nth-child(1) { animation: arrowFade 1.8s ease-in-out 0s infinite; }
+    .scroll-arrow:nth-child(2) { animation: arrowFade 1.8s ease-in-out 0.3s infinite; }
+    .scroll-arrow:nth-child(3) { animation: arrowFade 1.8s ease-in-out 0.6s infinite; }
+    @keyframes arrowFade {
+      0%   { opacity: 0;   transform: translateY(-4px); }
+      40%  { opacity: 1;   transform: translateY(0); }
+      80%  { opacity: 0.2; transform: translateY(4px); }
+      100% { opacity: 0;   transform: translateY(4px); }
+    }
     @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
     .hero-parallax-layer { position: absolute; inset: 0; will-change: transform; }
     .hero-bg-text {
@@ -400,7 +454,14 @@
       <p class="hero-eyebrow">Tech · Life · Gourmet · Review</p>
       <h1 class="hero-title">やまもっ<span>ちゃん</span><br>のブログ</h1>
       <p class="hero-sub">テック、日常、グルメ、気になるモノをぜんぶ書く場所</p>
-      <div class="hero-scroll"><span>Scroll</span><div class="scroll-line"></div></div>
+      <div class="hero-scroll" id="heroScroll">
+        <span class="hero-scroll-label">下にスクロール</span>
+        <div class="hero-scroll-arrows">
+          <div class="scroll-arrow"></div>
+          <div class="scroll-arrow"></div>
+          <div class="scroll-arrow"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -963,6 +1024,24 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeContact();
   });
+  /* ---- スクロール誘導ボタン ---- */
+  const heroScroll = document.getElementById('heroScroll');
+  if (heroScroll) {
+    heroScroll.addEventListener('click', () => {
+      document.querySelector('.page-shell').scrollIntoView({ behavior: 'smooth' });
+    });
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 80) {
+        heroScroll.style.opacity = '0';
+        heroScroll.style.transition = 'opacity 0.4s';
+        heroScroll.style.pointerEvents = 'none';
+      } else {
+        heroScroll.style.opacity = '';
+        heroScroll.style.pointerEvents = '';
+      }
+    }, { passive: true });
+  }
+
   buildSidebar();
   renderArticles();
   initAvatar();
